@@ -1,0 +1,183 @@
+html {
+    font-size: 100%;
+}
+
+body {
+    color: rgb(138,138,141);
+
+    font-size: 18px;
+    font-family: "Nunito", "Arial Rounded MT Bold", "Varela", sans-serif; 
+    /* background-image: linear-gradient(
+        to right,
+        rgb(113, 127, 248),
+        rgb(114, 244, 168)
+    ); */
+
+    display: flex;
+    justify-content: center;
+}
+
+.app {
+    width: 95vw;
+    max-width: 35rem;
+
+    border: 2px solid black;
+    background: rgb(230, 230, 230);
+    border-radius: 10px;
+
+    margin-top: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+}
+
+.logo, .merchant, .cart, .pay, .amount, .transaction {
+    padding: 0.375rem;
+    margin: 0.375rem auto;
+    border: 0px solid orangered;
+    width: 95%;
+}
+
+
+.logo img {
+    stroke: pink;
+    fill: pink;
+    display: block;
+    margin: auto;
+}
+
+
+.merchant {
+    color: rgba(0, 0, 0, 0.8);
+    text-align: center;
+    font-size: 1.25rem;
+}
+
+.merchant p {
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 1.0rem;
+}
+
+.merchant h3 {
+    padding-bottom: 0.5rem;
+}
+
+.merchant p {
+    line-height: 0.95rem;
+}
+
+
+.cart {
+    max-width: 95%;
+    background: white;
+    color: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 3px rgba(0, 0, 0, 0.2);
+}
+
+.cart h3{
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 1.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.25rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.cart h4{
+    margin-top: 1rem;
+}
+
+.cart ol{
+    margin: .5rem auto;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.cart ol{
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.cart li {
+    display: flex;
+    justify-content: space-between;
+}
+.cart h2 {
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.pay {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 3.5rem;
+    line-height: 2rem;
+}
+
+.pay button {
+    height: 4rem;
+    width: 80%;
+    border-radius: 4rem;
+    color: rgba(255, 255, 255, 1);
+    background: rgba(0, 0, 0, 0.75);
+    margin: 1.5rem auto 0rem;
+}
+  
+.pay button:hover,
+.pay button:active {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+footer {
+    margin-top: 0;
+    padding-top: 0;
+    font-size: 0.5rem;
+}
+
+
+.amount {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 3.5rem;
+    line-height: 2rem;
+}
+
+.transaction {
+    max-width: 95%;
+    background: white;
+    color: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 3px rgba(0, 0, 0, 0.2);
+    font-size: 0.8rem;
+    line-height: 1rem;
+}
+
+.transaction h3{
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 1.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.25rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.transaction h4{
+    margin-top: 1rem;
+}
+
+.transaction ol{
+    margin: .5rem auto;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.transaction li {
+    display: flex;
+    justify-content: space-between;
+}
+
+
