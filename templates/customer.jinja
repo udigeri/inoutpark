@@ -1,6 +1,6 @@
 {% extends "_main.jinja" %}
 
-{% block title %} Paid {% endblock %}
+{% block title %} Transaction {% endblock %}
 
 
 {% block main %}
@@ -52,7 +52,7 @@
                     <li>
                         ID
                         <span>
-                            a56dfd2f-1216-4d74-b4a0-798e12286469
+                            {{ uuid }}
                         </span>
                     </li>
                     <li>
@@ -79,14 +79,18 @@
                             APPROVED
                         </span>
                     </li>
-                    <a href="{{ url_for('static', filename='img/qr.svg') }}" class="qr">
-                        <img src="{{ url_for('static', filename='img/qr.svg') }}" alt="QR code" width="300">
+                    <a href="{{ url }}" class="qr">
+                        <img src="{{ qr }}" alt="QR code">
                     </a>
                 </ol>
             </main>
         </section>
 
-        <section class="status">
+        <section class="status approved">
+            &#x2714; &#x1F44D; APPROVED
+        </section>
 
+        <section class="status declined">
+            &#x2718; &#x1F44E; DECLINED
         </section>
 {% endblock %}

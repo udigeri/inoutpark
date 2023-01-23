@@ -194,10 +194,20 @@ footer {
 
 .qr img{
     display: block;
-    margin: auto;
+    margin: 1rem auto;
 }
 
 
 .status {
     text-align: center;
+    font-size: 3.25rem;
+    line-height: 3.25rem;
+}
+
+.approved {
+    color: green;
+}
+
+.declined {
+    color: red;
 }

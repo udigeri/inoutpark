@@ -1,0 +1,39 @@
+{% extends "_main.jinja" %}
+
+{% block title %} index {% endblock %}
+
+
+{% block main %}
+        <section class="logo">
+            <img src="{{ url_for('static', filename='img/p.svg') }}" alt="Parking logo" width="100">
+        </section>
+
+        <section class="merchant">
+            <h3>
+                InOut Park
+            </h3>
+            <p>
+                Scheidt&Bachmann Slovensko s.r.o<br>Priemyselná 14, 010 01 Žilina<br>Slovakia
+            </p>
+        </section>
+
+        <section class="cart">
+            <main>
+                <h3>
+                    Oooops !!!
+                </h3>
+                <ol>
+                    <li class="lpn">
+                        {{ error.name }}
+                        <span>
+                            Error: {{ error.code }}
+                        </span>
+                    </li>
+                    <li>
+                        {{ error.description }}
+                    </li>
+                </ol>
+            </main>
+        </section>
+
+{% endblock %}
