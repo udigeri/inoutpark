@@ -86,10 +86,6 @@ body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.cart h4{
-    margin-top: 1rem;
-}
-
 .cart ol{
     margin: .5rem auto;
     color: rgba(0, 0, 0, 0.5);
@@ -100,10 +96,17 @@ body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 }
 
+.cart .lpn{
+    margin: 0.5rem auto;
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 1.0rem;
+}
+
 .cart li {
     display: flex;
     justify-content: space-between;
 }
+
 .cart h2 {
     display: flex;
     justify-content: space-between;
@@ -155,8 +158,13 @@ footer {
     border-radius: 10px;
     border: 1px solid rgba(0, 0, 0, 0.5);
     box-shadow: 0px 3px rgba(0, 0, 0, 0.2);
-    font-size: 0.8rem;
-    line-height: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.2rem;
+}
+
+.ticket .divide {
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .ticket h3{
@@ -167,13 +175,15 @@ footer {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.ticket h4{
-    margin-top: 1rem;
-}
-
 .ticket ol{
     margin: .5rem auto;
     color: rgba(0, 0, 0, 0.5);
+}
+
+.ticket .lpn{
+    margin: 0.5rem auto;
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 1.0rem;
 }
 
 .ticket li {
@@ -187,10 +197,3 @@ footer {
     margin: auto;
 }
 
-
-.status svg {
-    margin: auto;
-    display: block;
-
-    stroke: aquamarine;
-}
