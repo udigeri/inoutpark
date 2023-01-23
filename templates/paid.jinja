@@ -1,17 +1,9 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./static/css/normalize.css">
-    <link rel="stylesheet" href="./static/css/app.css">
-</head>
-<body>
-    <div class="app">
+{% extends "_main.jinja" %}
+
+{% block title %} Paid {% endblock %}
+
+
+{% block main %}
         <section class="amount">
             € 23,05
         </section>
@@ -87,17 +79,14 @@
                             APPROVED
                         </span>
                     </li>
-                    <a href="./static/img/qr.svg" class="qr">
-                        <img src="./static/img/qr.svg" alt="QR code" width="300">
+                    <a href="{{ url_for('static', filename='img/qr.svg') }}" class="qr">
+                        <img src="{{ url_for('static', filename='img/qr.svg') }}" alt="QR code" width="300">
                     </a>
                 </ol>
             </main>
         </section>
 
         <section class="status">
-            APPROVED/DECLINED
-        </section>
 
-    </div>
-</body>
-</html>
+        </section>
+{% endblock %}
