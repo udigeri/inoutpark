@@ -5,8 +5,7 @@ from flask import flash
 
 from flask_qrcode import QRcode
 
-import psycopg2
-import psycopg2.extras
+from models import db
 
 host_name = "localhost"
 database = "postgres"
@@ -16,11 +15,21 @@ port_id = 5432
 
 flask_app = Flask(__name__)
 
+flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/postgres'
+flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 qrcode = QRcode(flask_app)
+
+db.init_app(flask_app)
+
+with flask_app.app_context():
+    db.create_all()
+
+
 
 @flask_app.route("/")
 def index():
-    flash("Successfull", category = "success")
+    flash("Successfull", "success")
     return render_template("index.jinja")
 
 @flask_app.errorhandler(404)
