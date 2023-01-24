@@ -1,8 +1,18 @@
 from flask import Flask
 from flask import render_template
 from flask import url_for
+from flask import flash
 
 from flask_qrcode import QRcode
+
+import psycopg2
+import psycopg2.extras
+
+host_name = "localhost"
+database = "postgres"
+username = "hudak.pavol"
+pwd = ""
+port_id = 5432
 
 flask_app = Flask(__name__)
 
@@ -10,6 +20,7 @@ qrcode = QRcode(flask_app)
 
 @flask_app.route("/")
 def index():
+    flash("Successfull", category = "success")
     return render_template("index.jinja")
 
 @flask_app.errorhandler(404)

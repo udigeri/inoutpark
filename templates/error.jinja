@@ -18,22 +18,20 @@
         </section>
 
         <section class="cart">
-            <main>
-                <h3>
-                    Oooops !!!
-                </h3>
-                <ol>
-                    <li class="lpn">
-                        {{ error.name }}
-                        <span>
-                            Error: {{ error.code }}
-                        </span>
-                    </li>
-                    <li>
-                        {{ error.description }}
-                    </li>
-                </ol>
-            </main>
+            <h3>
+                Oooops !!!
+            </h3>
+            <ol>
+                <li class="lpn">
+                    {{ error.name }}
+                    <span>
+                        Error: {{ error.code }}
+                    </span>
+                </li>
+                <li>
+                    {{ error.description }}
+                </li>
+            </ol>
         </section>
 
 {% endblock %}

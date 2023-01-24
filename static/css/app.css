@@ -33,6 +33,41 @@ body {
     align-content: center;
 }
 
+.flashes {
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 0.9rem;
+    font-weight: normal;
+    text-align: center;
+    width: 90%;
+}
+.success {
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+    background: rgba(52, 255, 52, 0.25);
+}
+.fail {
+    background: rgba(255, 52, 52, 0.25);
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+}
+
+#hideAfter10Seconds {
+    animation-name: hideAnimation;
+    animation-fill-mode: forwards;
+    animation-delay: 3s;
+    animation-duration: 7s;
+}
+
+@keyframes hideAnimation {
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+        height: 0;
+    }
+}
+
 .logo, .merchant, .cart, .pay, .amount, .ticket, .status{
     padding: 0.375rem;
     margin: 0.375rem auto;
@@ -76,6 +111,7 @@ body {
     border-radius: 10px;
     border: 1px solid rgba(0, 0, 0, 0.5);
     box-shadow: 0px 3px rgba(0, 0, 0, 0.2);
+    font-size: 1.0rem;
 }
 
 .cart h3{
