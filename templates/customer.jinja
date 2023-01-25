@@ -5,15 +5,15 @@
 
 {% block main %}
         <section class="amount">
-            € 23,05
+            € 11,05
         </section>
 
         <section class="merchant">
             <h3>
-                InOut Park
+                {{ tenant.name }}
             </h3>
             <p>
-                Žilina, Slovakia<br>06.02.2023 11:26
+                {{ tenant.city }}, {{ tenant.country }}<br>{{ tenant.created }}
             </p>
         </section>
 
@@ -57,7 +57,7 @@
                 <li>
                     Amount
                     <span>
-                        € 23,05
+                        € 11,05
                     </span>
                 </li>
                 <li>
