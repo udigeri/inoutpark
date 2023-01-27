@@ -5,7 +5,14 @@
 
 {% block main %}
         <section class="amount">
-            € 11,05
+            {% if cart.pgs_id.payCurrency == "EUR" %}
+            €
+            {% elif cart.pgs_id.payCurrency == "USD" %}
+            $
+            {% elif cart.pgs_id.payCurrency == "GBP" %}
+            £
+            {% endif %}
+            {{ cart.getFormattedAmount(cart.pgs_id.payAmount) }}
         </section>
 
         <section class="merchant">
@@ -13,10 +20,11 @@
                 {{ tenant.name }}
             </h3>
             <p>
-                {{ tenant.city }}, {{ tenant.country }}<br>{{ tenant.created }}
+                {{ tenant.city }}, {{ tenant.country }}<br>{{ tenant.created.strftime("%d.%m.%Y %H:%M") }}
             </p>
         </section>
 
+        {% if cart != None %}
         <section class="ticket">
             <h3>
                 Parking Ticket
@@ -25,57 +33,86 @@
                 <li class="lpn">
                     LPN
                     <span>
-                        ZA 123 HK
+                        {{ cart.lpn }}
                     </span>
                 </li>
                 <li class="epan">
                     EPAN
                     <span>
-                        02491012010011033016399610
+                        {{ cart.epan }}
+                    </span>
+                </li>
+                <li>
+                    UUID
+                    <span>
+                        {{ cart.id }}
                     </span>
                 </li>
                 <li>
                     from
                     <span>
-                        06.02.2023 10:13:45
+                        {{ cart.entryTime.strftime("%d.%m.%Y %H:%M:%S") }}
                     </span>
                 </li>
                 <li>
                     to
                     <span>
-                        06.02.2023 11:25:00
+                        {{ cart.authorizeTime.strftime("%d.%m.%Y %H:%M:%S") }}
                     </span>
                 </li>
                 <li class="divide">
                 </li>
                 <li>
+                    Cart
+                    <span>
+                        {{ cart.pgs_id.payShcId }}
+                    </span>
+                </li>
+                <li>
                     ID
                     <span>
-                        {{ uuid }}
+                        {{ cart.pgs_id.payId }}
+                    </span>
+                </li>
+                <li>
+                    Date
+                    <span>
+                        {{ cart.pgs_id.payTime.strftime("%d.%m.%Y %H:%M:%S") }}
                     </span>
                 </li>
                 <li>
                     Amount
                     <span>
-                        € 11,05
+                    {% if cart.pgs_id.payCurrency == "EUR" %}
+                        €
+                        {% elif cart.pgs_id.payCurrency == "USD" %}
+                        $
+                        {% elif cart.pgs_id.payCurrency == "GBP" %}
+                        £
+                    {% endif %}
+                    {{ cart.getFormattedAmount(cart.pgs_id.payAmount) }}
                     </span>
                 </li>
                 <li>
                     Card
                     <span>
-                        Mastercard
+                        {{ cart.pgs_id.payMediaType}}
                     </span>
                 </li>
                 <li>
                     PAN
                     <span>
-                        567890 **** 1234
+                        {{ cart.pgs_id.payMediaId}}
                     </span>
                 </li>
                 <li>
                     Status
                     <span>
+                        {% if cart.pgs_id.payStatus == 0 %}
                         APPROVED
+                        {% else %}
+                        DECLINED
+                        {% endif %}
                     </span>
                 </li>
                 <a href="{{ url }}" class="qr">
@@ -83,12 +120,17 @@
                 </a>
             </ol>
         </section>
+        {% endif %}
 
+        {% if cart.pgs_id.payStatus == 0 %}
         <section class="status approved">
             APPROVED &#x2714; &#x1F44D; 
         </section>
-
+        {% else %}
         <section class="status declined">
             DECLINED &#x2718; &#x1F44E; 
         </section>
+        {% endif %}
+
+
 {% endblock %}

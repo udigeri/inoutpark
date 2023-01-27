@@ -1,20 +1,25 @@
 {% extends "_main.jinja" %}
 
-{% block title %} lpn {% endblock %}
+{% block title %} pay {% endblock %}
 
 
 {% block main %}
-        <section class="logo">
-            <img src="{{ url_for('static', filename='img/p.svg') }}" alt="Parking logo" width="100">
+        <section class="amount">
+            {% if cart.currency == "EUR" %}
+            €
+            {% elif cart.currency == "USD" %}
+            $
+            {% elif cart.currency == "GBP" %}
+            £
+            {% endif %}
+            {{ cart.getFormattedAmount(cart.amount) }}
         </section>
 
-        <section class="merchant">
-            <h3>
-                {{ tenant.name }}
-            </h3>
-            <p>
-                {{ tenant.company }}<br>{{ tenant.street }}, {{ tenant.zip }} {{ tenant.city }}<br>{{ tenant.country }}
-            </p>
+        <section class="uuid">
+            Email for Receipt
+            <form class="uuid" action="{{ url_for('viewLpn') }}" method="POST">
+                <input type="email" placeholder="email" name="email" id=email/>
+            </form>
         </section>
 
         {% if cart != None %}
@@ -74,21 +79,9 @@
         </section>
 
         <section class="pay">
-            <h3>
-                {% if cart.currency == "EUR" %}
-                    €
-                    {% elif cart.currency == "USD" %}
-                    $
-                    {% elif cart.currency == "GBP" %}
-                    £
-                {% endif %}
-                <span class="amount">
-                    {{ cart.getFormattedAmount(cart.amount) }}
-                </span>
-            </h3>
             <a href="{{url_for('viewCarts')}}{{ cart.id }}?lpn=ZA123AZ&epan=02491012010011033016399610&amount=700&currency=EUR&entry=20230226131545&authorize=20230318152535">
                 <button>
-                    Pay
+                    Continue
                 </button>
             </a>
         </section>

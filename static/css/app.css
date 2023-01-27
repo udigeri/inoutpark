@@ -144,7 +144,7 @@ body {
     border-radius: 10px;
     border: 1px solid rgba(0, 0, 0, 0.5);
     box-shadow: 0px 3px rgba(0, 0, 0, 0.2);
-    font-size: 1.0rem;
+    font-size: 0.8rem;
 }
 
 .cart h3{
@@ -179,6 +179,7 @@ body {
 .cart h2 {
     display: flex;
     justify-content: space-between;
+    font-size: 1.0rem;
 }
 
 
@@ -227,7 +228,7 @@ footer {
     border-radius: 10px;
     border: 1px solid rgba(0, 0, 0, 0.5);
     box-shadow: 0px 3px rgba(0, 0, 0, 0.2);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     line-height: 1.2rem;
 }
 
