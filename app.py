@@ -109,22 +109,24 @@ def addCarts():
 def viewCartId(uuid):
     tenants = Tenants.query.filter_by(id = 1).first()
     carts = Carts.query.filter_by(id = uuid).first()
-    if carts.epan != None and carts.amount != None:
-        url = url_for("viewCartId", uuid=uuid)
-        print (url)
-        return render_template("pay.jinja", tenant=tenants, cart=carts)#, qr=qrcode(f'{url}'), url=url)
-    else:
-        args = request.args
-        carts.updated = datetime.utcnow()
-        carts.epan = args.get("epan")
-        carts.lpn = args.get("lpn")
-        carts.amount = args.get("amount")
-        carts.currency = args.get("currency")
-        carts.entryTime = "01.01.1977 00:00:00"
-        carts.authorizeTime = "01.01.1977 00:00:00"
-        db.session.commit()
-        return render_template("cart.jinja", tenant=tenants, cart=carts)
+    if carts.pgs_id == None:
+        if carts.epan != None and carts.amount != None:
+            return render_template("pay.jinja", tenant=tenants, cart=carts)#, qr=qrcode(f'{url}'), url=url)
+        else:
+            args = request.args
+            carts.updated = datetime.utcnow()
+            carts.epan = args.get("epan")
+            carts.lpn = args.get("lpn")
+            carts.amount = args.get("amount")
+            carts.currency = args.get("currency")
+            carts.entryTime = "01.01.1977 00:00:00"
+            carts.authorizeTime = "01.01.1977 00:00:00"
+            db.session.commit()
+            return render_template("cart.jinja", tenant=tenants, cart=carts)
 
+    else:
+        url = url_for("viewCartId", uuid=carts.approve_uuid)
+        return render_template("customer.jinja", tenant=tenants, cart=carts, qr=qrcode(f'{url}'), url=url)
 
 
 
