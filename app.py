@@ -101,35 +101,29 @@ def customer():
 def addCarts():
     db.session.add(Carts())
     db.session.commit()
-    return "OK"
-
-
-
-@flask_app.route("/carts/", methods=["GET"])
-def viewCarts():
-    return "List of carts"
+    return "New carts created - OK"
 
 
 
 @flask_app.route("/carts/<uuid:uuid>")
 def viewCartId(uuid):
     tenants = Tenants.query.filter_by(id = 1).first()
-    carts = None
     carts = Carts.query.filter_by(id = uuid).first()
     if carts.epan != None and carts.amount != None:
-        url = url_for("viewCarts") + f'{uuid}'
-        return render_template("pay.jinja", tenant=tenants, cart=carts, qr=qrcode(f'{url}'), url=url)
+        url = url_for("viewCartId", uuid=uuid)
+        print (url)
+        return render_template("pay.jinja", tenant=tenants, cart=carts)#, qr=qrcode(f'{url}'), url=url)
     else:
         args = request.args
         carts.updated = datetime.utcnow()
         carts.epan = args.get("epan")
-        lpn = carts.lpn = args.get("lpn")
+        carts.lpn = args.get("lpn")
         carts.amount = args.get("amount")
         carts.currency = args.get("currency")
         carts.entryTime = "01.01.1977 00:00:00"
         carts.authorizeTime = "01.01.1977 00:00:00"
         db.session.commit()
-        return render_template("lpn.jinja", tenant=tenants, cart=carts, lpn=lpn)
+        return render_template("cart.jinja", tenant=tenants, cart=carts)
 
 
 
@@ -155,8 +149,8 @@ def viewLpn():
 def viewLpnId(lpn):
     tenants = Tenants.query.filter_by(id = 1).first()
     carts = None
-    if len(request.form['lpn']) > 0:
-        carts = Carts.query.filter_by(lpn = request.form['lpn']).first()
+    if len(lpn) > 0:
+        carts = Carts.query.filter_by(lpn = lpn).first()
         if carts != None:
             flash("Successfull", "success")
         else:
