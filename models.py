@@ -21,6 +21,7 @@ class Tenants(TimestampMixin, db.Model):
     city = db.Column(db.String(30))
     zip = db.Column(db.String(10))
     country = db.Column(db.String(30))
+    base_url = db.Column(db.String(50))
     schema = db.Column(db.String(40), nullable=False)
     production = db.Column(db.Integer,nullable=False)
     suspend = db.Column(db.Integer,nullable=False)
@@ -42,7 +43,7 @@ class Carts(TimestampMixin, db.Model):
     pgs_id = db.relationship('Pgscarts', backref='carts', lazy=True, uselist=False)
 
     def getFormattedAmount(self, amount):
-        return '{},{:0<2}'.format(int(amount/100), int(amount%100))
+        return f'{int(amount/100)},{int(amount%100):02}'
 
 class Pgscarts(TimestampMixin, db.Model):
     __tablename__ = 'pgscarts'
@@ -59,3 +60,4 @@ class Pgscarts(TimestampMixin, db.Model):
     payMediaId = db.Column(db.String(20))
     payMediaType = db.Column(db.String(30))
     payStatus = db.Column(db.Integer, nullable=False)
+    payDescription = db.Column(db.String(255))

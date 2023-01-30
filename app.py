@@ -7,12 +7,16 @@ from flask import flash
 
 from flask_qrcode import QRcode
 from datetime import datetime
+from requests.auth import HTTPBasicAuth
+import json
 
+from sqlalchemy import func
 from models import db
 from models import Tenants
 from models import Carts
 from models import Pgscarts
-
+from rest import Restful
+from transaction import Transaction
 
 
 flask_app = Flask(__name__)
@@ -41,12 +45,14 @@ def filldb_default_tenant(self):
         city="Žilina",
         zip="01001",
         country="Slovakia",
-        schema="sk_inoutpark",
+        base_url="http://192.168.71.164",
+        schema="pgs-testCCV",
         production=0,
         suspend=0)
 
 def filldb_default_cart(self):
     return Carts(
+        updated=datetime.now(),
         epan="02491012010011033016399610",
         lpn="ZA123AZ",
         amount=700,
@@ -68,12 +74,77 @@ def filldb_default_pgscart(self):
         payId="C-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
         payMediaId="456789 **** 1234",
         payMediaType="Visa",
-        payStatus=0
+        payStatus=0,
+        payDescription="OK"
         )
 
-def getFormattedAmount(self, amount):
-    return '{}.{:0<2}'.format(int(amount/100), int(amount%100) )
+def get_shopping_cart(tenant, cart):
+    featureURL = "http://localhost:8080/pgs/public/api/payment/paymentcart/{tenantName}".format(
+        tenantName = tenant.schema
+        )
+    body = {"requestor": tenant.name, 
+            "correlationId": f"{cart.id}",
+            "amount": cart.amount,
+            "currency": cart.currency,
+            "reason": "Parking ticket",
+            "reference": cart.epan,
+            "successCallbackUrl": f"{tenant.base_url}/approved",
+            "failureCallbackUrl": f"{tenant.base_url}/declined",
+            "customStyle": "style=\"color:orange;\"",
+            "tokenRequired": False
+            }
 
+    rest = Restful()
+    resp = rest.put(featureURL, 
+                    data=json.dumps(body), 
+                    auth=HTTPBasicAuth("testexport", "testexport"))
+
+    shoppingCartUuid = None
+    if resp.status_code == 200:
+        data = json.loads(resp.text)
+        for key in data:
+            if key == 'cartId':
+                shoppingCartUuid = data[key]
+    return shoppingCartUuid
+
+def get_pay_methods(tenant, cart, shc):
+    featureURL = "http://localhost:8080/pgs/public/api/payment/paymenttypes/{tenantName}/{cart}/{correlationId}/{requestor}/{locale}?costCenter={costCentre}&imageColor={imageColor}".format(
+        tenantName=tenant.schema,
+        cart=shc,
+        correlationId=f"{cart.id}",
+        requestor=tenant.name,
+        locale="en-Gb",
+        costCentre=2014615,
+        imageColor=True,
+        )
+
+    rest = Restful()
+    resp = rest.get(featureURL, 
+                    data=None, 
+                    auth=HTTPBasicAuth("testexport", "testexport"))
+
+    trx = Transaction(cart.lpn, cart.lpn, cart.amount)
+    if resp.status_code == 200:
+        data = json.loads(resp.text)
+
+        # mandatory fields
+        trx.trx_methods = [y[z] for x in data for y in data[x] for z in y if x=='offeredPaymentTypes' if z=='name']
+        trx.trx_urls = [y[z] for x in data for y in data[x] for z in y if x=='offeredPaymentTypes' if z=='formUrl']
+        trx.trx_fees = [y[z] for x in data for y in data[x] for z in y if x=='offeredPaymentTypes' if z=='fee']
+        # optional fields
+        for i in range(len(trx.trx_methods)) :
+            method = data['offeredPaymentTypes'][i]
+            if (method['name'] == trx.trx_methods[i]):
+                if 'imageUrl' in method:
+                    trx.trx_imageUrls.append(method['imageUrl'])
+                else:
+                    trx.trx_imageUrls.append("../static/none.png")
+                if 'isTokenizationPossible' in method:
+                    trx.trx_possible_tokenization.append(method['isTokenizationPossible'])
+                else:
+                    trx.trx_possible_tokenization.append("False")
+
+    return trx
 
 
 db.init_app(flask_app)
@@ -97,11 +168,46 @@ def customer():
 
 
 
+@flask_app.route("/approved")
+def pay_approved():
+    flash("APPROVED", "success")
+    shc = request.args.get("shoppingCartUuid")
+
+    pgscarts = Pgscarts.query.filter_by(payShcId = shc).first()
+    pgscarts.payTime = datetime.now()
+    pgscarts.payId = request.args.get("payId")
+    pgscarts.payMediaId = request.args.get("maskedMediaId")
+    pgscarts.payMediaType = request.args.get("mediaType")
+    pgscarts.payStatus = 0
+    pgscarts.updated = pgscarts.payTime
+    pgscarts.payDescription = "OK"
+    db.session.commit()
+    return redirect(url_for("viewCartId", uuid=pgscarts.carts_id))
+
+@flask_app.route("/declined")
+def pay_declined():
+    flash("DECLINED", "fail")
+    shc = request.args.get("shoppingCartUuid")
+
+    pgscarts = Pgscarts.query.filter_by(payShcId = shc).first()
+    pgscarts.payTime = datetime.now()
+    pgscarts.payId = request.args.get("payId")
+    pgscarts.payMediaId = request.args.get("maskedMediaId")
+    pgscarts.payMediaType = request.args.get("mediaType")
+    pgscarts.payStatus = 1
+    pgscarts.updated = pgscarts.payTime
+    pgscarts.payDescription = request.args.get("description")
+    db.session.commit()
+    return redirect(url_for("viewCartId", uuid=pgscarts.carts_id))
+
+
 @flask_app.route("/carts/add", methods=["GET"])
 def addCarts():
-    db.session.add(Carts())
+    cart = Carts()
+    cart.entryTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    db.session.add(cart)
     db.session.commit()
-    return "New carts created - OK"
+    return f"New cart {cart.id} created - OK"
 
 
 
@@ -110,23 +216,46 @@ def viewCartId(uuid):
     tenants = Tenants.query.filter_by(id = 1).first()
     carts = Carts.query.filter_by(id = uuid).first()
     if carts.pgs_id == None:
-        if carts.epan != None and carts.amount != None:
-            return render_template("pay.jinja", tenant=tenants, cart=carts)#, qr=qrcode(f'{url}'), url=url)
+        if (carts.epan != None and carts.amount != None):
+            shc = get_shopping_cart(tenants, carts)
+            trx = get_pay_methods(tenants, carts, shc)
+            pgsCart  = Pgscarts(
+                updated=datetime.now(),
+                carts_id = uuid,
+                payShcId=shc,
+                payAmount=carts.amount,
+                payCurrency=carts.currency,
+                # payTime="03.18.2023 15:26:00",
+                # payId="C-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+                # payMediaId="456789 **** 1234",
+                # payMediaType="Visa",
+                payStatus=2
+                )
+            db.session.add(pgsCart)
+            db.session.commit()
+            return render_template("pay.jinja", tenant=tenants, cart=carts, numMethods=len(trx.trx_methods), trx=trx)
         else:
             args = request.args
-            carts.updated = datetime.utcnow()
+            carts.updated = datetime.now()
             carts.epan = args.get("epan")
             carts.lpn = args.get("lpn")
             carts.amount = args.get("amount")
             carts.currency = args.get("currency")
-            carts.entryTime = "01.01.1977 00:00:00"
-            carts.authorizeTime = "01.01.1977 00:00:00"
+            carts.authorizeTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             db.session.commit()
             return render_template("cart.jinja", tenant=tenants, cart=carts)
 
     else:
-        url = url_for("viewCartId", uuid=carts.approve_uuid)
-        return render_template("customer.jinja", tenant=tenants, cart=carts, qr=qrcode(f'{url}'), url=url)
+        if carts.pgs_id.payStatus == 2:
+            shc = carts.pgs_id.payShcId
+            trx = get_pay_methods(tenants, carts, shc)
+            return render_template("pay.jinja", tenant=tenants, cart=carts, numMethods=len(trx.trx_methods), trx=trx)
+        else:
+            if carts.pgs_id.payStatus == 0:
+                url = url_for("viewCartId", uuid=carts.approve_uuid)
+            else:
+                url = url_for("viewCartId", uuid=carts.decline_uuid)
+            return render_template("customer.jinja", tenant=tenants, cart=carts, qr=qrcode(f'{url}'), url=url)
 
 
 
@@ -136,14 +265,24 @@ def viewLpn():
     lpn = None
     carts = None
     if len(request.form['lpn']) > 0:
-        carts = Carts.query.filter_by(lpn = request.form['lpn']).first()
-        if carts != None:
-            lpn = carts.lpn
-            flash("Successfull", "success")
-        else:
-            flash("Failed", "fail")
+        lpn = request.form['lpn']
+        carts = Carts.query.filter(func.upper(Carts.lpn) == func.upper(lpn)).first()
 
-    return render_template("lpn.jinja", tenant=tenants, cart=carts, lpn=lpn)
+        if carts != None:
+            if carts.pgs_id == None:
+                lpn = carts.lpn
+                return render_template("lpn.jinja", tenant=tenants, cart=carts, lpn=lpn)
+            else:
+                if carts.pgs_id.payStatus == 0:
+                    url = url_for("viewCartId", uuid=carts.approve_uuid)
+                else:
+                    url = url_for("viewCartId", uuid=carts.decline_uuid)
+                return render_template("customer.jinja", tenant=tenants, cart=carts, qr=qrcode(f'{url}'), url=url)
+        else:
+            flash(f"LPN: {lpn} not found", "fail")
+            return redirect(url_for("index"))
+    else:
+        return redirect(url_for("index"))
 
 
 
@@ -152,10 +291,20 @@ def viewLpnId(lpn):
     tenants = Tenants.query.filter_by(id = 1).first()
     carts = None
     if len(lpn) > 0:
-        carts = Carts.query.filter_by(lpn = lpn).first()
-        if carts != None:
-            flash("Successfull", "success")
-        else:
-            flash("Failed", "fail")
-    return render_template("lpn.jinja", tenant=tenants, cart=carts, lpn=lpn)
+        carts = Carts.query.filter(func.upper(Carts.lpn) == func.upper(lpn)).first()
 
+        if carts != None:
+            if carts.pgs_id == None:
+                lpn = carts.lpn
+                return render_template("lpn.jinja", tenant=tenants, cart=carts, lpn=lpn)
+            else:
+                if carts.pgs_id.payStatus == 0:
+                    url = url_for("viewCartId", uuid=carts.approve_uuid)
+                else:
+                    url = url_for("viewCartId", uuid=carts.decline_uuid)
+                return render_template("customer.jinja", tenant=tenants, cart=carts, qr=qrcode(f'{url}'), url=url)
+        else:
+            flash(f"LPN: {lpn} not found", "fail")
+            return redirect(url_for("index"))
+    else:
+        return redirect(url_for("index"))

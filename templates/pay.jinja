@@ -23,63 +23,31 @@
             </form>
         </section>
 
-        <section class="cart">
+        <section class="method">
             <h3>
-                Parking Ticket
+                Choose Payment Method(s)
             </h3>
             <ol>
-                <li class="lpn">
-                    LPN
-                    <span>
-                        {{ cart.lpn }}
-                    </span>
-                </li>
-                <li class="epan">
-                    EPAN
-                    <span>
-                        {{ cart.epan }}
-                    </span>
-                </li>
+            {% for id in range(numMethods) %}
                 <li>
-                    from
-                    <span>
-                        {{ cart.entryTime.strftime("%d.%m.%Y %H:%M:%S") }}
-                    </span>
+                    <a href="{{trx.trx_urls[id]}}">
+                        <img src={{trx.trx_imageUrls[id]}}  height="58" alt="{{ trx.trx_methods[id] }}"/>
+                    </a>
                 </li>
-                <li>
-                    to
-                    <span>
-                        {{ cart.authorizeTime.strftime("%d.%m.%Y %H:%M:%S") }}
-                    </span>
-                </li>
-                <li class="divide"></li>
+            {% endfor %}
             </ol>
-
-            <h2>
-                Total
-                <span>
-                    {% if cart.currency == "EUR" %}
-                        €
-                        {% elif cart.currency == "USD" %}
-                        $
-                        {% elif cart.currency == "GBP" %}
-                        £
-                    {% endif %}
-                    {{ cart.getFormattedAmount(cart.amount) }}
-                </span>
-            </h2>
         </section>
 
-        <section class="pay">
+        <!-- <section class="pay">
             <a href="{{url_for('viewCartId', uuid = cart.id)}}">
                 <button>
-                    Continue
+                    Reload
                 </button>
             </a>
-        </section>
+        </section> -->
 
         <footer>
-            You will be redirected to S&B PGS - Payment Gateway Service
+            You will be redirected to S&B PGS - Payment Gateway Service.
         </footer>
 
         {% else %}

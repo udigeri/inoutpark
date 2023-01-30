@@ -2,5 +2,11 @@
 
 import segno
 
-qrcode = segno.make('http://192.168.1.9/carts/5141e5e5-f30d-4707-bffa-b89abf958081?lpn=ZA321AZ&epan=02491012010011033016399611&amount=1480&currency=EUR&entry=20230226131545&authorize=20230318152535')
+cart = "f05a2384-438a-45f3-819e-11be411a372e"
+lpn = "ZA987AZ"
+epan = "02491012010011033016399615"
+amount = 1700
+url = f'http://192.168.71.164/carts/{cart}?lpn={lpn}&epan={epan}&amount={amount}&currency=EUR'
+qrcode = segno.make(url)
+print (url)
 qrcode.save('./static/img/qr.svg')

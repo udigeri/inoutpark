@@ -86,7 +86,7 @@
                     {{ cart.getFormattedAmount(cart.amount) }}
                 </span>
             </h3>
-            <a href="{{url_for('viewCarts')}}{{ cart.id }}?lpn=ZA123AZ&epan=02491012010011033016399610&amount=700&currency=EUR&entry=20230226131545&authorize=20230318152535">
+            <a href="{{url_for('viewCartId', uuid = cart.id)}}?lpn=ZA123AZ&epan=02491012010011033016399610&amount=700&currency=EUR&entry=20230226131545&authorize=20230318152535">
                 <button>
                     Pay
                 </button>

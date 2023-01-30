@@ -20,7 +20,7 @@
                 {{ tenant.name }}
             </h3>
             <p>
-                {{ tenant.city }}, {{ tenant.country }}<br>{{ tenant.created.strftime("%d.%m.%Y %H:%M") }}
+                {{ tenant.city }}, {{ tenant.country }}<br>{{ cart.pgs_id.payTime.strftime("%d.%m.%Y %H:%M") }}
             </p>
         </section>
 
@@ -87,18 +87,31 @@
                     {{ cart.getFormattedAmount(cart.pgs_id.payAmount) }}
                     </span>
                 </li>
+                {% if cart.pgs_id.payStatus == 0 %}
+                    {% if cart.pgs_id.payMediaType != None %}
+                    <li>
+                        Card
+                        <span>
+                            {{ cart.pgs_id.payMediaType}}
+                        </span>
+                    </li>
+                    {% endif %}
+                    {% if cart.pgs_id.payMediaId != None %}
+                    <li>
+                        PAN
+                        <span>
+                            {{ cart.pgs_id.payMediaId}}
+                        </span>
+                    </li>
+                    {% endif %}
+                {% else %}
                 <li>
-                    Card
+                    &nbsp;
                     <span>
-                        {{ cart.pgs_id.payMediaType}}
+                        {{ cart.pgs_id.payDescription }}
                     </span>
                 </li>
-                <li>
-                    PAN
-                    <span>
-                        {{ cart.pgs_id.payMediaId}}
-                    </span>
-                </li>
+                {% endif %}
                 <li>
                     Status
                     <span>
