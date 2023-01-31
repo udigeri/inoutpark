@@ -232,7 +232,7 @@ def statusCart(uuid):
     if cart == None:
         return jsonify(
             cartId=uuid,
-            status="UNKNOWN",
+            payStatus="UNKNOWN",
         )
     else:
         if cart.pgs_id == None:
@@ -242,7 +242,7 @@ def statusCart(uuid):
                 declineId=cart.decline_uuid,
                 epan=cart.epan,
                 lpn=cart.lpn,
-                status="CREATED"
+                payStatus="CREATED"
             )
         else:
             if cart.pgs_id.payStatus == 0:
@@ -258,7 +258,7 @@ def statusCart(uuid):
                     payMediaId=cart.pgs_id.payMediaId,
                     payMediaType=cart.pgs_id.payMediaType,
                     payDescription=cart.pgs_id.payDescription,
-                    status="APPROVED"
+                    payStatus="APPROVED"
                 )
             elif cart.pgs_id.payStatus == 1:
                 return jsonify(
@@ -273,7 +273,7 @@ def statusCart(uuid):
                     payMediaId=cart.pgs_id.payMediaId,
                     payMediaType=cart.pgs_id.payMediaType,
                     payDescription=cart.pgs_id.payDescription,
-                    status="DECLINED"
+                    payStatus="DECLINED"
                 )
             elif cart.pgs_id.payStatus == 2:
                 return jsonify(
@@ -282,7 +282,7 @@ def statusCart(uuid):
                     declineId=cart.decline_uuid,
                     epan=cart.epan,
                     lpn=cart.lpn,
-                    status="PROCESSING"
+                    payStatus="PROCESSING"
                 )
 
 
