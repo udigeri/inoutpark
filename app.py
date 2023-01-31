@@ -4,6 +4,7 @@ from flask import redirect
 from flask import url_for
 from flask import request
 from flask import flash
+from flask import jsonify
 
 from flask_qrcode import QRcode
 from datetime import datetime
@@ -156,48 +157,47 @@ def index():
     tenants = Tenants.query.filter_by(id = 1).first()
     return render_template("index.jinja", tenant=tenants)
 
+
 @flask_app.errorhandler(404)
 @flask_app.errorhandler(500)
 def not_found(error):
     tenants = Tenants.query.filter_by(id = 1).first()
     return render_template("error.jinja", tenant=tenants, error=error), error.code
 
-@flask_app.route("/customer")
-def customer():
-    return render_template("customer.jinja")
-
 
 
 @flask_app.route("/approved")
 def pay_approved():
-    flash("APPROVED", "success")
     shc = request.args.get("shoppingCartUuid")
+    if shc != None:
+        flash("APPROVED", "success")
 
-    pgscarts = Pgscarts.query.filter_by(payShcId = shc).first()
-    pgscarts.payTime = datetime.now()
-    pgscarts.payId = request.args.get("payId")
-    pgscarts.payMediaId = request.args.get("maskedMediaId")
-    pgscarts.payMediaType = request.args.get("mediaType")
-    pgscarts.payStatus = 0
-    pgscarts.updated = pgscarts.payTime
-    pgscarts.payDescription = "OK"
-    db.session.commit()
+        pgscarts = Pgscarts.query.filter_by(payShcId = shc).first()
+        pgscarts.payTime = datetime.now()
+        pgscarts.payId = request.args.get("payId")
+        pgscarts.payMediaId = request.args.get("maskedMediaId")
+        pgscarts.payMediaType = request.args.get("mediaType")
+        pgscarts.payStatus = 0
+        pgscarts.updated = pgscarts.payTime
+        pgscarts.payDescription = "OK"
+        db.session.commit()
     return redirect(url_for("viewCartId", uuid=pgscarts.carts_id))
 
 @flask_app.route("/declined")
 def pay_declined():
-    flash("DECLINED", "fail")
     shc = request.args.get("shoppingCartUuid")
+    if shc != None:
+        flash("DECLINED", "fail")
 
-    pgscarts = Pgscarts.query.filter_by(payShcId = shc).first()
-    pgscarts.payTime = datetime.now()
-    pgscarts.payId = request.args.get("payId")
-    pgscarts.payMediaId = request.args.get("maskedMediaId")
-    pgscarts.payMediaType = request.args.get("mediaType")
-    pgscarts.payStatus = 1
-    pgscarts.updated = pgscarts.payTime
-    pgscarts.payDescription = request.args.get("description")
-    db.session.commit()
+        pgscarts = Pgscarts.query.filter_by(payShcId = shc).first()
+        pgscarts.payTime = datetime.now()
+        pgscarts.payId = request.args.get("payId")
+        pgscarts.payMediaId = request.args.get("maskedMediaId")
+        pgscarts.payMediaType = request.args.get("mediaType")
+        pgscarts.payStatus = 1
+        pgscarts.updated = pgscarts.payTime
+        pgscarts.payDescription = request.args.get("description")
+        db.session.commit()
     return redirect(url_for("viewCartId", uuid=pgscarts.carts_id))
 
 
@@ -207,11 +207,87 @@ def addCarts():
     cart.entryTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     db.session.add(cart)
     db.session.commit()
-    return f"New cart {cart.id} created - OK"
+    return f"<html>New cart <br><h3>{cart.id}</h3><br>created - OK</html>"
 
 
 
-@flask_app.route("/carts/<uuid:uuid>")
+@flask_app.route("/carts/add", methods=["POST"])
+def createCart():
+    cart = Carts()
+    cart.entryTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    db.session.add(cart)
+    db.session.commit()
+    return jsonify(
+        cartId=cart.id,
+        approveId=cart.approve_uuid,
+        declineId=cart.decline_uuid,
+    )
+
+
+
+@flask_app.route("/carts/<uuid:uuid>", methods=["POST"])
+def statusCart(uuid):
+    tenants = Tenants.query.filter_by(id = 1).first()
+    cart = Carts.query.filter_by(id = uuid).first()
+    if cart == None:
+        return jsonify(
+            cartId=uuid,
+            status="UNKNOWN",
+        )
+    else:
+        if cart.pgs_id == None:
+            return jsonify(
+                cartId=cart.id,
+                approveId=cart.approve_uuid,
+                declineId=cart.decline_uuid,
+                epan=cart.epan,
+                lpn=cart.lpn,
+                status="CREATED"
+            )
+        else:
+            if cart.pgs_id.payStatus == 0:
+                return jsonify(
+                    cartId=cart.id,
+                    approveId=cart.approve_uuid,
+                    declineId=cart.decline_uuid,
+                    epan=cart.epan,
+                    lpn=cart.lpn,
+                    payShcId=cart.pgs_id.payShcId,
+                    payAmount=cart.pgs_id.payAmount,
+                    payId=cart.pgs_id.payId,
+                    payMediaId=cart.pgs_id.payMediaId,
+                    payMediaType=cart.pgs_id.payMediaType,
+                    payDescription=cart.pgs_id.payDescription,
+                    status="APPROVED"
+                )
+            elif cart.pgs_id.payStatus == 1:
+                return jsonify(
+                    cartId=cart.id,
+                    approveId=cart.approve_uuid,
+                    declineId=cart.decline_uuid,
+                    epan=cart.epan,
+                    lpn=cart.lpn,
+                    payShcId=cart.pgs_id.payShcId,
+                    payAmount=cart.pgs_id.payAmount,
+                    payId=cart.pgs_id.payId,
+                    payMediaId=cart.pgs_id.payMediaId,
+                    payMediaType=cart.pgs_id.payMediaType,
+                    payDescription=cart.pgs_id.payDescription,
+                    status="DECLINED"
+                )
+            elif cart.pgs_id.payStatus == 2:
+                return jsonify(
+                    cartId=cart.id,
+                    approveId=cart.approve_uuid,
+                    declineId=cart.decline_uuid,
+                    epan=cart.epan,
+                    lpn=cart.lpn,
+                    status="PROCESSING"
+                )
+
+
+
+@flask_app.route("/carts/<uuid:uuid>", methods=["GET"])
 def viewCartId(uuid):
     tenants = Tenants.query.filter_by(id = 1).first()
     carts = Carts.query.filter_by(id = uuid).first()
@@ -252,9 +328,10 @@ def viewCartId(uuid):
             return render_template("pay.jinja", tenant=tenants, cart=carts, numMethods=len(trx.trx_methods), trx=trx)
         else:
             if carts.pgs_id.payStatus == 0:
-                url = url_for("viewCartId", uuid=carts.approve_uuid)
+                url = url_for("viewCartId", uuid=carts.approve_uuid) + f"?epan={carts.epan}" + f"&amount={carts.pgs_id.payAmount}" + f"&currency={carts.pgs_id.payCurrency}" + f"&payId={carts.pgs_id.payId}"
             else:
-                url = url_for("viewCartId", uuid=carts.decline_uuid)
+                url = url_for("viewCartId", uuid=carts.decline_uuid) + f"?epan={carts.epan}" + f"&amount={carts.pgs_id.payAmount}" + f"&currency={carts.pgs_id.payCurrency}" + f"&payId={carts.pgs_id.payId}" + f"&payDescr={carts.pgs_id.payDescription}"
+
             return render_template("customer.jinja", tenant=tenants, cart=carts, qr=qrcode(f'{url}'), url=url)
 
 
